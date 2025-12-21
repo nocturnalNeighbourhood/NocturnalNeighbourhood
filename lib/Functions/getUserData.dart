@@ -48,21 +48,20 @@ class Getuserdata {
     return about;
   }
 
-  Future<List<String>> getUserNamesWithSkill(String skill) async {
+  Stream<QuerySnapshot>? usersWithSkillStream(List<String> skills) {
+  if (skills.isEmpty) return null;
+
   final user = FirebaseAuth.instance.currentUser!;
   final domain = user.email!.split('@').last;
 
-  final querySnapshot = await FirebaseFirestore.instance
+  return FirebaseFirestore.instance
       .collection('users')
       .doc(domain)
       .collection('Details')
-      .where('skills', arrayContains: skill)
-      .get();
-
-  return querySnapshot.docs
-      .map((doc) => doc.data()['name'] as String)
-      .toList();
+      .where('skills', arrayContainsAny: skills)
+      .snapshots();
 }
+
 
   
 

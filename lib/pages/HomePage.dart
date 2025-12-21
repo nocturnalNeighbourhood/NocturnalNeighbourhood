@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:nocturnal/Functions/getUserData.dart';
 import 'package:nocturnal/Utils/MyTextField.dart';
 import 'package:nocturnal/pages/InvitationsPage.dart';
 import 'package:nocturnal/pages/ProfilePage.dart';
+import 'package:nocturnal/pages/QueryBuilderPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -101,6 +103,18 @@ class _HomePageState extends State<HomePage> {
                 hintText: "Search for UI designers for your app",
                 fontSize: 16,
                 iconButton: Icons.near_me,
+                onTap: () {
+                  final String Skills = queryController.text.trim();
+                  if (queryController.text.isEmpty) return;
+
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => Querybuilderpage(
+                            skill: Skills,
+                          )));
+
+                  queryController.clear();
+                  print("query text ${Skills}");
+                },
               ),
             ),
             const SizedBox(height: 40),
