@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:nocturnal/Functions/createUserData.dart';
 import 'package:nocturnal/Utils/MyTextField.dart';
 import 'package:nocturnal/pages/LoginPage.dart';
@@ -69,67 +70,78 @@ class _RegisterpageState extends State<Registerpage> {
         backgroundColor: Colors.black,
         body: Padding(
           padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              Spacer(),
-              Mytextfield(
-                hintText: "Name",
-                controller: nameController,
-                obscureText: false,
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
               ),
-              SizedBox(height: 20),
-              Mytextfield(
-                hintText: "Email",
-                controller: emailController,
-                obscureText: false,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Mytextfield(
-                hintText: "Password",
-                controller: passwordController,
-                obscureText: true,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Mytextfield(
-                hintText: "Confirm Password",
-                controller: confirmPasswordController,
-                obscureText: true,
-              ),
-              SizedBox(height: 20),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => Loginpage()));
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: Center(
+                child: Column(
                   children: [
-                    Text(
-                      "Already have an account?",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                          color: Colors.grey),
+                    SizedBox(height: 10),
+                    Lottie.asset("lib/Animations/login_owl.json", height: 200),
+                    SizedBox(height: 20),
+                    Mytextfield(
+                      hintText: "Name",
+                      controller: nameController,
+                      obscureText: false,
                     ),
-                    Text(
-                      " Login",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                          color: Colors.white),
+                    SizedBox(height: 20),
+                    Mytextfield(
+                      hintText: "Email",
+                      controller: emailController,
+                      obscureText: false,
                     ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Mytextfield(
+                      hintText: "Password",
+                      controller: passwordController,
+                      obscureText: true,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Mytextfield(
+                      hintText: "Confirm Password",
+                      controller: confirmPasswordController,
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => Loginpage()));
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already have an account?",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                color: Colors.grey),
+                          ),
+                          Text(
+                            " Login",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    ElevatedButton(onPressed: signUp, child: Text("Register")),
                   ],
                 ),
               ),
-              SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(onPressed: signUp, child: Text("Register")),
-            ],
+            ),
           ),
         ));
   }

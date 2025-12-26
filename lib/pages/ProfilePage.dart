@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nocturnal/Functions/getUserData.dart';
 import 'package:nocturnal/pages/EditProfilePage.dart';
+import 'package:nocturnal/pages/ProjectsPage.dart';
 
 class Profilepage extends StatefulWidget {
   const Profilepage({super.key});
@@ -35,6 +36,10 @@ class _ProfilepageState extends State<Profilepage> {
       about = About;
     });
     setState(() {});
+  }
+
+  void signOut() {
+    FirebaseAuth.instance.signOut();
   }
 
   @override
@@ -104,6 +109,90 @@ class _ProfilepageState extends State<Profilepage> {
                     borderRadius: BorderRadius.circular(8)),
                 child: Center(
                     child: Text("Edit Profile",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 18))),
+              ),
+            ),
+            SizedBox(height: 25),
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text("Are you sure you want to log out?"),
+                        content: SizedBox(
+                          height: 80,
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            color: Colors.grey),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Text(
+                                            "Cancel",
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      //log out method gotta write dont forget vish!!
+                                      signOut();
+                                      Navigator.pop(context);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            color: Colors.black),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10),
+                                          child: Text(
+                                            "Log out",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+              },
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(8)),
+                child: Center(
+                    child: Text("Log Out",
                         style: TextStyle(
                             fontWeight: FontWeight.w600, fontSize: 18))),
               ),
@@ -201,18 +290,25 @@ class _ProfilepageState extends State<Profilepage> {
                   SizedBox(
                     height: 40,
                   ),
-                  Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 76, 76, 76),
-                        borderRadius: BorderRadius.circular(8)),
-                    child: Center(
-                      child: Text(
-                        "Projects",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                              Projectspage(userEmail: email!, currentEmail: email!,)));
+                    },
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 76, 76, 76),
+                          borderRadius: BorderRadius.circular(8)),
+                      child: Center(
+                        child: Text(
+                          "Projects",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18),
+                        ),
                       ),
                     ),
                   )

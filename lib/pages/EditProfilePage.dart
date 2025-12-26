@@ -31,7 +31,7 @@ class _EditprofilepageState extends State<Editprofilepage> {
   Future<void> addSkill(String skill1) async {
     final user = FirebaseAuth.instance.currentUser!;
     final domain = user.email!.split('@').last;
-    final skill = skill1;
+    final skill = skill1.toLowerCase();
 
     if (skill.isEmpty) return;
 

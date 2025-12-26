@@ -23,3 +23,5 @@ flutter:
   uses-material-design: true
   assets:
     - lib/Animations/owl_waving.json
+    - lib/Animations/heresNothingOwl.json
+    - lib/Animations/login_owl.json

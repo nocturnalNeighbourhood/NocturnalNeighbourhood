@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:nocturnal/Utils/MyTextField.dart';
 import 'package:nocturnal/pages/RegisterPage.dart';
 
@@ -25,6 +26,9 @@ class _LoginpageState extends State<Loginpage> {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: emailController.text, password: passwordController.text);
       if (!mounted) return;
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       if (mounted) {
@@ -51,56 +55,72 @@ class _LoginpageState extends State<Loginpage> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.black,
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         body: Padding(
           padding: const EdgeInsets.all(10),
-          child: Column(
-            children: [
-              Spacer(),
-              Mytextfield(
-                hintText: "Email",
-                controller: emailController,
-                obscureText: false,
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
               ),
-              SizedBox(
-                height: 20,
-              ),
-              Mytextfield(
-                hintText: "Password",
-                controller: passwordController,
-                obscureText: true,
-              ),
-              SizedBox(height: 20),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => Registerpage()));
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      "Don't have an account yet?",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                          color: Colors.grey),
+                    SizedBox(
+                      height: 10,
                     ),
-                    Text(
-                      " Register Now",
-                      style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                          color: Colors.white),
+                    Lottie.asset("lib/Animations/login_owl.json", height: 200),
+                    SizedBox(
+                      height: 20,
                     ),
+                    Mytextfield(
+                      hintText: "Email",
+                      controller: emailController,
+                      obscureText: false,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Mytextfield(
+                      hintText: "Password",
+                      controller: passwordController,
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => Registerpage()));
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account yet?",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                color: Colors.grey),
+                          ),
+                          Text(
+                            " Register Now",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                    ),
+                    ElevatedButton(onPressed: signIn, child: Text("Login")),
                   ],
                 ),
               ),
-              SizedBox(
-                height: 40,
-              ),
-              ElevatedButton(onPressed: signIn, child: Text("Login")),
-            ],
+            ),
           ),
         ));
   }

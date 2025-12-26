@@ -7,7 +7,8 @@ import 'package:nocturnal/pages/ProfilePage.dart';
 import 'package:nocturnal/pages/QueryBuilderPage.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String currentUserEmail;
+  const HomePage({super.key, required this.currentUserEmail});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -25,7 +26,7 @@ class _HomePageState extends State<HomePage> {
         leading: GestureDetector(
           onTap: () {
             Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => Invitationspage()));
+                MaterialPageRoute(builder: (context) => Invitationspage(domain: widget.currentUserEmail.split('@').last, userEmail: widget.currentUserEmail,)));
           },
           child: Icon(
             Icons.notifications,
@@ -110,6 +111,7 @@ class _HomePageState extends State<HomePage> {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => Querybuilderpage(
                             skill: Skills,
+                            currentUserEmail: widget.currentUserEmail,
                           )));
 
                   queryController.clear();

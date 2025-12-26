@@ -8,6 +8,9 @@ class Mytextfield extends StatelessWidget {
   final double? fontSize;
   final IconData? iconButton;
   final Function()? onTap;
+  final Color? hintColor;
+  final Color? textColor;
+  final bool? multiLine;
   const Mytextfield(
       {super.key,
       this.fontSize,
@@ -15,12 +18,19 @@ class Mytextfield extends StatelessWidget {
       this.onTap,
       required this.hintText,
       required this.obscureText,
-      required this.controller});
+      required this.controller,
+      this.multiLine,
+      this.hintColor,
+      this.textColor});
 
   @override
   Widget build(BuildContext context) {
     if (iconButton == null) {
       return TextField(
+        maxLines: (multiLine ?? false) ? null : 1,
+        style: TextStyle(
+          color: (textColor == null) ? Colors.white : textColor,
+        ),
         decoration: InputDecoration(
             enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: Theme.of(context).primaryColor),
@@ -31,13 +41,18 @@ class Mytextfield extends StatelessWidget {
             hintText: hintText,
             hintStyle: TextStyle(
               fontSize: fontSize,
-              color: Colors.white, //Theme.of(context).colorScheme.onSurface
+              color: (hintColor == null)
+                  ? Colors.white
+                  : hintColor, //Theme.of(context).colorScheme.onSurface
             )),
         controller: controller,
         obscureText: obscureText,
       );
     } else {
       return TextField(
+        style: TextStyle(
+          color: (textColor == null) ? Colors.white : textColor,
+        ),
         decoration: InputDecoration(
             suffixIcon: IconButton(
                 onPressed: onTap,
@@ -57,7 +72,9 @@ class Mytextfield extends StatelessWidget {
             hintText: hintText,
             hintStyle: TextStyle(
               fontSize: fontSize,
-              color: Colors.white, //Theme.of(context).colorScheme.onSurface
+              color: (hintColor == null)
+                  ? Colors.white
+                  : hintColor, //Theme.of(context).colorScheme.onSurface
             )),
         controller: controller,
         obscureText: obscureText,

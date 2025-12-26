@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class UserData{
+class UserData {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> CreateUserData({
@@ -12,7 +12,6 @@ class UserData{
     try {
       final firestore = FirebaseFirestore.instance;
 
-
       FirebaseFirestore.instance
           .collection('users')
           .doc(domain)
@@ -22,6 +21,7 @@ class UserData{
         'name': name,
         'uid': uid,
         'skills': [],
+        'invitations': [],
         'TimeStamp': Timestamp.now(),
       });
     } catch (e) {
