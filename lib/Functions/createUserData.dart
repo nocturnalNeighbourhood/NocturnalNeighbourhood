@@ -24,7 +24,7 @@ class UserData {
         'name': name,
         'uid': uid,
         'pfp': pfp,
-        'pass': pass,
+       
         'skills': [],
         'invitations': [],
         'phoneNumber': phoneNumber,
