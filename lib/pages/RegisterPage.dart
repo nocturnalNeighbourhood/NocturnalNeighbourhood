@@ -53,7 +53,7 @@ class _RegisterpageState extends State<Registerpage> {
         String uid = usercred.user!.uid;
 
         await UserData().CreateUserData(
-          pass: passwordController.text.trim(),
+          
           pfp: pfp!,
           uid: uid,
           domain: domain,
