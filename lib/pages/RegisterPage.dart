@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:nocturnal/Functions/createUserData.dart';
 import 'package:nocturnal/Utils/MyTextField.dart';
 import 'package:nocturnal/pages/LoginPage.dart';
+import 'package:nocturnal/pages/showImages.dart';
 
 class Registerpage extends StatefulWidget {
   const Registerpage({super.key});
@@ -16,12 +17,25 @@ class _RegisterpageState extends State<Registerpage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  String? pfp = "";
+
+  String capForFirstLetters(String userName) {
+    if (userName.isEmpty) return userName;
+
+    return userName.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
 
   //sign up
   void signUp() async {
     if (!mounted) return;
+
+    final name = capForFirstLetters(nameController.text.trim());
 
     showDialog(
         context: context,
@@ -31,19 +45,25 @@ class _RegisterpageState extends State<Registerpage> {
       try {
         final usercred = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
-                email: emailController.text, password: passwordController.text);
-        final domain = emailController.text.split('@').last;
+                email: "${emailController.text.trim()}@iiitg.ac.in",
+                password: passwordController.text);
+        final domain =
+            "${emailController.text.trim()}@iiitg.ac.in".split('@').last;
 
         String uid = usercred.user!.uid;
 
         await UserData().CreateUserData(
+          pass: passwordController.text.trim(),
+          pfp: pfp!,
           uid: uid,
           domain: domain,
-          email: emailController.text,
-          name: nameController.text,
+          email: "${emailController.text.trim()}@iiitg.ac.in",
+          name: name,
+          phoneNumber: phoneController.text.trim(),
         );
 
         if (!mounted) return;
+        Navigator.of(context, rootNavigator: true).pop();
         Navigator.pop(context);
       } on FirebaseAuthException catch (e) {
         if (mounted) Navigator.pop(context);
@@ -79,7 +99,49 @@ class _RegisterpageState extends State<Registerpage> {
                 child: Column(
                   children: [
                     SizedBox(height: 10),
-                    Lottie.asset("lib/Animations/login_owl.json", height: 200),
+                    GestureDetector(
+                      onTap: () async {
+                        pfp = await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) => Showimages())) ??
+                            pfp;
+
+                        setState(() {});
+                      },
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle, color: Colors.white),
+                        child: (pfp!.isEmpty)
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.person,
+                                    size: 150,
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Text(
+                                      "Tap to add Profile Pic",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Colors.black),
+                                    ),
+                                  )
+                                ],
+                              )
+                            : ClipOval(
+                                child: Image.asset(
+                                  pfp!,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                      ),
+                    ),
                     SizedBox(height: 20),
                     Mytextfield(
                       hintText: "Name",
@@ -90,6 +152,16 @@ class _RegisterpageState extends State<Registerpage> {
                     Mytextfield(
                       hintText: "Email",
                       controller: emailController,
+                      obscureText: false,
+                      isEmail: true,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Mytextfield(
+                      hintText: "Phone Number",
+                      controller: phoneController,
+                      isPhonenumber: true,
                       obscureText: false,
                     ),
                     SizedBox(
@@ -137,7 +209,18 @@ class _RegisterpageState extends State<Registerpage> {
                     SizedBox(
                       height: 20,
                     ),
-                    ElevatedButton(onPressed: signUp, child: Text("Register")),
+                    ElevatedButton(
+                        onPressed: pfp!.isEmpty
+                            ? () {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                        content: Text(
+                                  "Choose a profile pic",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                )));
+                              }
+                            : signUp,
+                        child: Text("Register")),
                   ],
                 ),
               ),

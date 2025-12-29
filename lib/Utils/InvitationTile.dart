@@ -31,6 +31,7 @@ class Invitationtile extends StatefulWidget {
 class _InvitationtileState extends State<Invitationtile> {
   String receiverName = '';
   String senderName = '';
+  String? pfp = "";
 
   Future<void> getName(String userEmail, String who) async {
     final Name = await Getuserdata.name(userEmail);
@@ -47,13 +48,24 @@ class _InvitationtileState extends State<Invitationtile> {
     setState(() {});
   }
 
+  Future<void> getPfp(String userEmail) async {
+    final PFP = await Getuserdata.pfp(userEmail);
+    if (!mounted) return;
+    setState(() {
+      pfp = PFP;
+    });
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     if (widget.currentEmail == widget.senderEmail) {
       getName(widget.receiverEmail, "receiver");
+      getPfp(widget.receiverEmail);
     } else {
       getName(widget.senderEmail, "sender");
+      getPfp(widget.senderEmail);
     }
   }
 
@@ -65,122 +77,372 @@ class _InvitationtileState extends State<Invitationtile> {
       padding: const EdgeInsets.all(10),
       child: Container(
         decoration: BoxDecoration(
-            color: Colors.grey, borderRadius: BorderRadius.circular(8)),
+            color: Colors.grey[600], borderRadius: BorderRadius.circular(8)),
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: Icon(
-                          Icons.person,
-                          color: Colors.black,
-                          size: 40,
-                        ),
-                      ),
-                      Text(isSender ? receiverName : senderName,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.black)),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text("Project: ${widget.projectName}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.black)),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text(
-                        "Required: ${widget.skills.toString().substring(1).replaceAll("]", "")}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                            color: Colors.black)),
-                  ),
-                ],
-              ),
-              (!isSender && widget.status == "pending")
-                  ? Row(
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(right: 10),
-                          child: GestureDetector(
-                            onTap: () async {
-                              await Invitations().acceptInvite(
-                                  projectID: widget.ProjectID,
-                                  ExistingProject: widget.existingProject,
-                                  receiverSkills: widget.skills,
-                                  inviteId: widget.inviteId,
-                                  domain: widget.senderEmail
-                                      .toString()
-                                      .split("@")
-                                      .last,
-                                  projectName: widget.projectName,
-                                  senderEmail: widget.senderEmail,
-                                  receiverEmail: widget.receiverEmail);
-                            },
-                            child: Icon(
-                              Icons.check_sharp,
-                              color: Colors.black,
-                              size: 40,
-                            ),
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            clipBehavior: Clip.hardEdge,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle, color: Colors.white),
+                            child: (pfp!.isEmpty)
+                                ? Icon(
+                                    Icons.person,
+                                    size: 150,
+                                  )
+                                : ClipOval(
+                                    child: Image.asset(
+                                      pfp!,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () async {
-                            await Invitations().rejectInvite(
-                                inviteId: widget.inviteId,
-                                domain: widget.senderEmail
-                                    .toString()
-                                    .split("@")
-                                    .last,
-                                senderEmail: widget.senderEmail,
-                                receiverEmail: widget.receiverEmail);
-                          },
-                          child: Icon(
-                            Icons.close_rounded,
-                            color: Colors.white,
-                            size: 40,
-                          ),
-                        )
-                      ],
-                    )
-                  : Column(
-                      children: [
-                        Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Icon(
-                                Icons.circle,
-                                color: (widget.status == "accepted")
-                                    ? Colors.green
-                                    : (widget.status == "rejected")
-                                        ? Colors.red
-                                        : Colors.black,
-                                size: 10,
-                              ),
-                            ),
-                            Text("Status: ${widget.status}",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                    color: Colors.black)),
-                          ],
-                        ),
+                        Text(isSender ? receiverName : senderName,
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: Colors.black)),
                       ],
                     ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, top: 10),
+                      child: Text("Project: ${widget.projectName}",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Text(
+                          "Required: ${widget.skills.toString().substring(1).replaceAll("]", "")}",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                              color: Colors.black)),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        (!isSender && widget.status == "pending")
+                            ? Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 10),
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        await showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                backgroundColor:
+                                                    Colors.grey[850],
+                                                title: Center(
+                                                  child: Text(
+                                                    "Are you sure you want to accept?",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 18,
+                                                        color: Colors.white),
+                                                  ),
+                                                ),
+                                                content: SizedBox(
+                                                  height: 80,
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(8.0),
+                                                              child: Container(
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(
+                                                                                8),
+                                                                    color: Colors
+                                                                        .grey),
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .all(
+                                                                          10),
+                                                                  child: Text(
+                                                                    "Cancel",
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .black,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .bold,
+                                                                        fontSize:
+                                                                            16),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          GestureDetector(
+                                                            onTap: () async {
+                                                              await Invitations().acceptInvite(
+                                                                  projectID: widget
+                                                                      .ProjectID,
+                                                                  ExistingProject:
+                                                                      widget
+                                                                          .existingProject,
+                                                                  receiverSkills:
+                                                                      widget
+                                                                          .skills,
+                                                                  inviteId: widget
+                                                                      .inviteId,
+                                                                  domain: widget
+                                                                      .senderEmail
+                                                                      .toString()
+                                                                      .split(
+                                                                          "@")
+                                                                      .last,
+                                                                  projectName:
+                                                                      widget
+                                                                          .projectName,
+                                                                  senderEmail:
+                                                                      widget
+                                                                          .senderEmail,
+                                                                  receiverEmail:
+                                                                      widget
+                                                                          .receiverEmail);
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(8.0),
+                                                              child: Container(
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(
+                                                                                8),
+                                                                    color: Colors
+                                                                        .black),
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .all(
+                                                                          10),
+                                                                  child: Text(
+                                                                    "Accept",
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .bold,
+                                                                        fontSize:
+                                                                            16),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            });
+                                      },
+                                      child: Icon(
+                                        Icons.check_sharp,
+                                        color: Colors.black,
+                                        size: 40,
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      await showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return AlertDialog(
+                                              backgroundColor: Colors.grey[850],
+                                              title: Center(
+                                                child: Text(
+                                                  "Are you sure you want to reject?",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 18,
+                                                      color: Colors.white),
+                                                ),
+                                              ),
+                                              content: SizedBox(
+                                                height: 80,
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(8.0),
+                                                            child: Container(
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              8),
+                                                                  color: Colors
+                                                                      .grey),
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        10),
+                                                                child: Text(
+                                                                  "Cancel",
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .black,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      fontSize:
+                                                                          16),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        GestureDetector(
+                                                          onTap: () async {
+                                                            await Invitations().rejectInvite(
+                                                                inviteId: widget
+                                                                    .inviteId,
+                                                                domain: widget
+                                                                    .senderEmail
+                                                                    .toString()
+                                                                    .split("@")
+                                                                    .last,
+                                                                senderEmail: widget
+                                                                    .senderEmail,
+                                                                receiverEmail:
+                                                                    widget
+                                                                        .receiverEmail);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(8.0),
+                                                            child: Container(
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              8),
+                                                                  color: Colors
+                                                                      .black),
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        10),
+                                                                child: Text(
+                                                                  "Reject",
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      fontSize:
+                                                                          16),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          });
+                                    },
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      color: Colors.white,
+                                      size: 40,
+                                    ),
+                                  )
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8.0),
+                                        child: Icon(
+                                          Icons.circle,
+                                          color: (widget.status == "accepted")
+                                              ? Colors.green
+                                              : (widget.status == "rejected")
+                                                  ? Colors.red
+                                                  : Colors.black,
+                                          size: 10,
+                                        ),
+                                      ),
+                                      Text("Status: ${widget.status}",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16,
+                                              color: Colors.black)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

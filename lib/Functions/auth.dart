@@ -18,7 +18,7 @@ class AuthPage extends StatelessWidget {
               final Email = user.email;
               return HomePage(currentUserEmail: Email!);
             } else {
-              return const Loginpage();
+              return Loginpage();
             }
           }),
     );

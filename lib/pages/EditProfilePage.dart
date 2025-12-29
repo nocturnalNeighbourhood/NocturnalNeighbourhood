@@ -6,13 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:nocturnal/Functions/getUserData.dart';
 import 'package:nocturnal/Utils/MyTextField.dart';
+import 'package:nocturnal/pages/showImages.dart';
 
 class Editprofilepage extends StatefulWidget {
   final String name;
   final String about;
   final String email;
+  final String pfp;
   const Editprofilepage(
       {super.key,
+      required this.pfp,
       required this.name,
       required this.about,
       required this.email});
@@ -27,6 +30,8 @@ class _EditprofilepageState extends State<Editprofilepage> {
   final TextEditingController skillController = TextEditingController();
   String email = '';
   String domain = '';
+  String? pfp = "";
+  int changesMade = 0;
 
   Future<void> addSkill(String skill1) async {
     final user = FirebaseAuth.instance.currentUser!;
@@ -44,6 +49,16 @@ class _EditprofilepageState extends State<Editprofilepage> {
       'skills': FieldValue.arrayUnion([skill]),
     });
 
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+      "Skill added!",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    )));
+
+    changesMade++;
+    if (!mounted) return;
+    setState(() {});
+
     skillController.clear();
   }
 
@@ -59,13 +74,24 @@ class _EditprofilepageState extends State<Editprofilepage> {
         .update({
       'skills': FieldValue.arrayRemove([skill]),
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+      "Skill removed!",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    )));
+
+    changesMade--;
+    if (!mounted) return;
+    setState(() {});
   }
 
   bool checkChanges() {
     return (((widget.name != nameController.text) &&
                 (nameController.text.isNotEmpty)) ||
             ((widget.about != aboutController.text) &&
-                (aboutController.text.isNotEmpty)))
+                (aboutController.text.isNotEmpty)) ||
+            widget.pfp != pfp)
         ? true
         : false;
   }
@@ -73,6 +99,7 @@ class _EditprofilepageState extends State<Editprofilepage> {
   Future<void> updateProfile({
     required String newName,
     required String newAbout,
+    required String newPfp,
   }) async {
     final ref = FirebaseFirestore.instance
         .collection("users")
@@ -90,9 +117,16 @@ class _EditprofilepageState extends State<Editprofilepage> {
             ref.update({'about': newAbout})
           }
         : null;
+    (newPfp != widget.pfp) && newPfp.isNotEmpty
+        ? {
+            await ref.update({'pfp': newPfp})
+          }
+        : null;
 
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text("Profile Updated")));
+
+    Navigator.pop(context);
   }
 
   void _onTextChanged() {
@@ -106,7 +140,7 @@ class _EditprofilepageState extends State<Editprofilepage> {
     super.initState();
     nameController = TextEditingController(text: widget.name);
     aboutController = TextEditingController(text: widget.about);
-
+    pfp = widget.pfp;
     nameController.addListener(_onTextChanged);
     aboutController.addListener(_onTextChanged);
   }
@@ -121,16 +155,26 @@ class _EditprofilepageState extends State<Editprofilepage> {
             padding: const EdgeInsets.only(right: 20),
             child: GestureDetector(
               onTap: checkChanges()
-                  ? () {
-                      updateProfile(
+                  ? () async {
+                      await updateProfile(
                           newName: nameController.text.trim(),
-                          newAbout: aboutController.text.trim());
+                          newAbout: aboutController.text.trim(),
+                          newPfp: pfp!);
+                      Navigator.pop(context);
                     }
-                  : null,
+                  : (changesMade != 0)
+                      ? () async {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Profile Updated")));
+                          Navigator.pop(context);
+                        }
+                      : null,
               child: Container(
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: checkChanges() ? Colors.white : Colors.grey),
+                    color: (checkChanges() || (changesMade != 0))
+                        ? Colors.white
+                        : Colors.grey),
                 child: Padding(
                   padding: const EdgeInsets.only(
                       right: 8, left: 8, top: 4, bottom: 4),
@@ -166,10 +210,33 @@ class _EditprofilepageState extends State<Editprofilepage> {
                     height: 40,
                   ),
                   Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle, color: Colors.white),
-                      height: 200,
+                    child: GestureDetector(
+                      onTap: () async {
+                        pfp = await Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (context) => Showimages())) ??
+                            pfp;
+
+                        setState(() {});
+                      },
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle, color: Colors.white),
+                        child: (pfp!.isEmpty)
+                            ? Icon(
+                                Icons.person,
+                                size: 150,
+                              )
+                            : ClipOval(
+                                child: Image.asset(
+                                  pfp!,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                      ),
                     ),
                   ),
                   SizedBox(height: 20),
@@ -270,7 +337,7 @@ class _EditprofilepageState extends State<Editprofilepage> {
                   SizedBox(
                     height: 40,
                   ),
-                  Container(
+                  /*Container(
                     height: 50,
                     decoration: BoxDecoration(
                         color: const Color.fromARGB(255, 76, 76, 76),
@@ -284,7 +351,7 @@ class _EditprofilepageState extends State<Editprofilepage> {
                             fontSize: 18),
                       ),
                     ),
-                  )
+                  )*/
                 ],
               ),
             ),

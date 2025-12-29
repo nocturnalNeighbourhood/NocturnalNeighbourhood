@@ -64,6 +64,18 @@ class Invitations {
     final usersRef =
         firestore.collection("users").doc(domain).collection("Details");
 
+    final senderRef = await usersRef.doc(senderEmail).get();
+
+    final senderData = senderRef.data() as Map<String, dynamic>?;
+
+    final senderPhone = await senderData!['phoneNumber'] as String;
+
+    final receiverRef = await usersRef.doc(senderEmail).get();
+
+    final receiverData = receiverRef.data() as Map<String, dynamic>?;
+
+    final receiverPhone = await receiverData!['phoneNumber'] as String;
+
     DocumentReference<Map<String, dynamic>> projectRef =
         firestore.collection("projects").doc(inviteId);
 
@@ -78,6 +90,7 @@ class Invitations {
             receiverEmail: {
               "role": "collaborator",
               "skills": receiverSkills,
+              "phoneNumber": receiverPhone,
             },
           },
           "memberEmails": FieldValue.arrayUnion([receiverEmail]),
@@ -107,10 +120,11 @@ class Invitations {
             receiverEmail: {
               "role": "collaborator",
               "skills": receiverSkills,
+              "phoneNumber": senderPhone,
             },
           },
           "memberEmails": [senderEmail, receiverEmail],
-          "status": "ongoing",
+          "status": "Ongoing",
           "about": "",
         },
         SetOptions(merge: true),

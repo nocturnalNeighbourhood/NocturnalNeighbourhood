@@ -3,18 +3,49 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nocturnal/Functions/getUserData.dart';
 import 'package:nocturnal/pages/ProfilePageSearch.dart';
+import 'package:rxdart/rxdart.dart';
 
 class Querybuilderpage extends StatefulWidget {
   final String skill;
   final String currentUserEmail;
-  const Querybuilderpage({super.key, required this.skill, required this.currentUserEmail});
+  const Querybuilderpage(
+      {super.key, required this.skill, required this.currentUserEmail});
 
   @override
   State<Querybuilderpage> createState() => _QuerybuilderpageState();
 }
 
+class QuerySnapshotFake implements QuerySnapshot {
+  @override
+  final List<QueryDocumentSnapshot> docs;
+  QuerySnapshotFake({this.docs = const []});
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 class _QuerybuilderpageState extends State<Querybuilderpage> {
   List<String> Skills = [];
+
+  Stream<QuerySnapshot> combinedUsersStream(
+      List<String> skills, String userName) {
+    final skillStream = Getuserdata().usersWithSkillStream(skills) ??
+        Stream.value(QuerySnapshotFake());
+    final nameStream = Getuserdata().usersNamesStream(userName) ??
+        Stream.value(QuerySnapshotFake());
+
+    return CombineLatestStream.combine2(
+      skillStream,
+      nameStream,
+      (QuerySnapshot a, QuerySnapshot b) {
+        final allDocs = [...a.docs, ...b.docs];
+
+        final uniqueDocs =
+            {for (var doc in allDocs) doc.id: doc}.values.toList();
+
+        return QuerySnapshotFake(docs: uniqueDocs);
+      },
+    );
+  }
 
   List<String> controlSkills(String input) {
     final List<String> listSkills = input
@@ -41,6 +72,15 @@ class _QuerybuilderpageState extends State<Querybuilderpage> {
     return listSkills;
   }
 
+  String capForFirstLetters(String userName) {
+    if (userName.isEmpty) return userName;
+
+    return userName.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -64,10 +104,26 @@ class _QuerybuilderpageState extends State<Querybuilderpage> {
         child: Column(
           children: [
             StreamBuilder<QuerySnapshot>(
-              stream: Getuserdata().usersWithSkillStream(Skills),
+              stream:
+                  combinedUsersStream(Skills, capForFirstLetters(widget.skill)),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                      child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(top: 8.0, bottom: 8),
+                        child: Text(
+                          "Searching for ${Skills.toString().substring(1).replaceAll("]", "")}",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      CircularProgressIndicator(),
+                    ],
+                  ));
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -90,16 +146,6 @@ class _QuerybuilderpageState extends State<Querybuilderpage> {
 
                 return Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 8),
-                      child: Text(
-                        "Searching for people who mastered ${Skills.toString().substring(1).replaceAll("]", "")}",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
@@ -110,20 +156,34 @@ class _QuerybuilderpageState extends State<Querybuilderpage> {
                         final name = data['name'] ?? 'No Name';
                         final email = docs[index].id;
                         final skills = List<String>.from(data['skills'] ?? []);
+                        final pfp = data['pfp'];
 
                         return Padding(
                           padding: const EdgeInsets.all(10),
                           child: Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
-                                color: Colors.grey),
+                                color: Colors.grey[850]),
                             child: ListTile(
-                              leading: const CircleAvatar(
-                                
-                                  child: Icon(
-                                Icons.person,
-                                color: Colors.white,
-                              )),
+                              leading: Container(
+                                width: 60,
+                                height: 60,
+                                clipBehavior: Clip.hardEdge,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.white),
+                                child: (pfp!.isEmpty)
+                                    ? Icon(
+                                        Icons.person,
+                                        size: 150,
+                                      )
+                                    : ClipOval(
+                                        child: Image.asset(
+                                          pfp!,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                              ),
                               title: Text(
                                 name,
                                 style: TextStyle(
@@ -141,8 +201,16 @@ class _QuerybuilderpageState extends State<Querybuilderpage> {
                               onTap: () {
                                 //print("Tapped on $name");
                                 Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) =>
-                                        Profilepagesearch(UserEmail: email, currentUserEmail: widget.currentUserEmail, reqSkills: [Skills.toString().substring(1).replaceAll("]", "")],)));
+                                    builder: (context) => Profilepagesearch(
+                                          UserEmail: email,
+                                          currentUserEmail:
+                                              widget.currentUserEmail,
+                                          reqSkills: [
+                                            Skills.toString()
+                                                .substring(1)
+                                                .replaceAll("]", "")
+                                          ],
+                                        )));
                               },
                             ),
                           ),

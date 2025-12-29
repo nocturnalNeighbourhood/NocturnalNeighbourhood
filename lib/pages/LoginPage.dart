@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nocturnal/Utils/MyTextField.dart';
+import 'package:nocturnal/pages/HomePage.dart';
 import 'package:nocturnal/pages/RegisterPage.dart';
 
 class Loginpage extends StatefulWidget {
@@ -28,8 +29,11 @@ class _LoginpageState extends State<Loginpage> {
       if (!mounted) return;
       if (mounted) {
         Navigator.of(context, rootNavigator: true).pop();
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) =>
+                HomePage(currentUserEmail: emailController.text)));
       }
-      Navigator.pop(context);
+      //Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         Navigator.pop(context);

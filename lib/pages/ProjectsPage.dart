@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:nocturnal/Functions/getUserData.dart';
 import 'package:nocturnal/Utils/projectTile.dart';
+import 'package:nocturnal/pages/ProjectCreationPage.dart';
 
 class Projectspage extends StatefulWidget {
   final String userEmail;
   final String currentEmail;
-  const Projectspage({super.key, required this.userEmail, required this.currentEmail});
+  final String phoneNumber;
+  const Projectspage(
+      {super.key,
+      required this.userEmail,
+      required this.currentEmail,
+      required this.phoneNumber});
 
   @override
   State<Projectspage> createState() => _ProjectspageState();
@@ -23,6 +29,21 @@ class _ProjectspageState extends State<Projectspage> {
         ),
         centerTitle: true,
       ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.grey[850],
+        onPressed: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => ProjectCreationPage(
+                    currentEmail: widget.currentEmail,
+                    phoneNumber: widget.phoneNumber,
+                  )));
+        },
+        child: Icon(
+          Icons.add,
+          size: 40,
+          color: Colors.white,
+        ),
+      ),
       backgroundColor: Colors.black,
       body: SingleChildScrollView(
           child: Center(
@@ -38,9 +59,12 @@ class _ProjectspageState extends State<Projectspage> {
 
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
-                    child: const Text(
+                    child: Text(
                       "No projects yet",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18),
                     ),
                   );
                 }

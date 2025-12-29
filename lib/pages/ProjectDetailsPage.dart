@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:nocturnal/Functions/getUserData.dart';
 import 'package:nocturnal/Utils/MyTextField.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Projectdetailspage extends StatefulWidget {
   final String projectName;
@@ -49,6 +50,15 @@ class _ProjectdetailspageState extends State<Projectdetailspage> {
         .update({
       'status': status,
     });
+  }
+
+  Future<void> openWhatsApp(String phoneNumber) async {
+    final url = Uri.parse(
+      "https://wa.me/$phoneNumber",
+    );
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not open WhatsApp';
+    }
   }
 
   @override
@@ -229,10 +239,14 @@ class _ProjectdetailspageState extends State<Projectdetailspage> {
                       padding: const EdgeInsets.all(10),
                       child: Row(
                         children: [
-                          Text(
-                            "${(widget.project['about'] ?? ((widget.currentEmail == widget.creatorEmail) ? "Tap to add project description" : "Not Specified"))}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 15),
+                          Flexible(
+                            child: Text(
+                              "${(widget.project['about'].toString().isEmpty ? ((widget.currentEmail == widget.creatorEmail) ? "Tap to add project description" : "Not Specified") : widget.project['about'])}",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: Colors.white),
+                            ),
                           ),
                         ],
                       ),
@@ -257,76 +271,83 @@ class _ProjectdetailspageState extends State<Projectdetailspage> {
                   final email = entry.key;
                   final role = entry.value['role'];
                   final skills = List<String>.from(entry.value['skills'] ?? []);
+                  final phoneNumber = entry.value['phoneNumber'];
 
-                  return Card(
-                    color: Colors.grey[900],
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FutureBuilder<String?>(
-                            future: getName(email),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const Text(
-                                  "...",
-                                  style: TextStyle(color: Colors.grey),
+                  return GestureDetector(
+                    onTap: () async {
+                      await openWhatsApp("91${phoneNumber ?? 0}");
+                    },
+                    child: Card(
+                      color: Colors.grey[900],
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FutureBuilder<String?>(
+                              future: getName(email),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const Text(
+                                    "...",
+                                    style: TextStyle(color: Colors.grey),
+                                  );
+                                }
+
+                                if (!snapshot.hasData ||
+                                    snapshot.data == null) {
+                                  return const Text(
+                                    "Anonymous ^^",
+                                    style: TextStyle(color: Colors.grey),
+                                  );
+                                }
+
+                                return Text(
+                                  snapshot.data!,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 );
-                              }
-
-                              if (!snapshot.hasData || snapshot.data == null) {
-                                return const Text(
-                                  "Anonymous ^^",
-                                  style: TextStyle(color: Colors.grey),
-                                );
-                              }
-
-                              return Text(
-                                snapshot.data!,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              );
-                            },
-                          ),
-                          Text(
-                            email,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                              },
                             ),
-                          ),
-                          Text(
-                            role,
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 13,
+                            Text(
+                              email,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
-                          ),
-                          if (skills.isNotEmpty) ...[
-                            SizedBox(height: 6),
-                            Wrap(
-                              spacing: 6,
-                              runSpacing: 6,
-                              children: skills
-                                  .map(
-                                    (skill) => Chip(
-                                      label: Text(skill),
-                                      backgroundColor: Colors.blueGrey,
-                                      labelStyle: TextStyle(
-                                          color: Colors.white, fontSize: 12),
-                                    ),
-                                  )
-                                  .toList(),
+                            Text(
+                              role,
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 13,
+                              ),
                             ),
+                            if (skills.isNotEmpty) ...[
+                              SizedBox(height: 6),
+                              Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: skills
+                                    .map(
+                                      (skill) => Chip(
+                                        label: Text(skill),
+                                        backgroundColor: Colors.blueGrey,
+                                        labelStyle: TextStyle(
+                                            color: Colors.white, fontSize: 12),
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   );

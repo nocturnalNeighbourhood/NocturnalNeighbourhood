@@ -8,6 +8,9 @@ class UserData {
     required String email,
     required String name,
     required String uid,
+    required String pfp,
+    required String phoneNumber,
+    required String pass,
   }) async {
     try {
       final firestore = FirebaseFirestore.instance;
@@ -20,8 +23,11 @@ class UserData {
           .set({
         'name': name,
         'uid': uid,
+        'pfp': pfp,
+        'pass': pass,
         'skills': [],
         'invitations': [],
+        'phoneNumber': phoneNumber,
         'TimeStamp': Timestamp.now(),
       });
     } catch (e) {
